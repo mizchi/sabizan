@@ -1,16 +1,15 @@
-# gulp-webapp-skeleton
+# webpack-skeleton
 
 ## Build
 
 ```
-npm install
-bower install
-gulp
-open public/index.html
+$ npm install
+$ bower install
+$ webpack
 ```
 
 ## Dev
 
 ```
-gulp watch
+$ webpack -w
 ```
