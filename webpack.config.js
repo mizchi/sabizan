@@ -11,14 +11,13 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.coffee$/, loader: "coffee" },
-      { test: /\.less$/  , loader: "style!css!less"},
       { test: /\.css$/   , loader: "style!css?root=." }
     ]
   },
 
   resolve: {
     root: [path.join(__dirname, "bower_components")],
-    extensions: ["", ".coffee", ".ts", ".js"]
+    extensions: ["", ".coffee", ".js"]
   },
 
   plugins: [
