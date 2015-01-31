@@ -44,13 +44,6 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(1)
-
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
 	window.addEventListener('load', (function(_this) {
 	  return function() {
 	    return console.log('initialized!', new Date);
