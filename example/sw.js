@@ -44,13 +44,13 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Sabizan, router;
+	var Sabizan, proxy;
 
 	Sabizan = __webpack_require__(1);
 
-	router = new Sabizan(location.origin + '/api');
+	proxy = new Sabizan(location.origin + '/api');
 
-	router.get('/user/:id', function(arg, arg1, req) {
+	proxy.get('/user/:id', function(arg, arg1, req) {
 	  var foo, id;
 	  id = arg.id;
 	  foo = arg1.foo;
@@ -60,7 +60,7 @@
 	  };
 	});
 
-	router.post('/post', function(arg, params) {
+	proxy.post('/post', function(arg, params) {
 	  arg;
 	  return {
 	    type: 'this is post:' + params.prop
@@ -68,8 +68,8 @@
 	});
 
 	self.onfetch = function(event) {
-	  if (router.isHandleScope(event.request.url)) {
-	    return event.respondWith(router.createResponse(event.request));
+	  if (proxy.isHandleScope(event.request.url)) {
+	    return event.respondWith(proxy.createResponse(event.request));
 	  }
 	};
 
@@ -78,23 +78,23 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var PathToRegexp, Router, url;
+	var PathToRegexp, Proxy, url;
 
 	PathToRegexp = __webpack_require__(3);
 
 	url = __webpack_require__(4);
 
-	Router = (function() {
-	  function Router(root) {
+	module.exports = Proxy = (function() {
+	  function Proxy(root) {
 	    this.root = root;
 	    this.routes = [];
 	  }
 
-	  Router.prototype.isHandleScope = function(path) {
+	  Proxy.prototype.isHandleScope = function(path) {
 	    return path.indexOf(this.root) > -1;
 	  };
 
-	  Router.prototype.search = function(method, path) {
+	  Proxy.prototype.search = function(method, path) {
 	    var i, j, key, len, len1, m, match, n, r, ref, ref1;
 	    ref = this.routes;
 	    for (i = 0, len = ref.length; i < len; i++) {
@@ -118,7 +118,7 @@
 	    return new Error(path + ' is not routed to anywhere');
 	  };
 
-	  Router.prototype.route = function(method, path, callback) {
+	  Proxy.prototype.route = function(method, path, callback) {
 	    return this.routes.push({
 	      method: method,
 	      regexp: PathToRegexp(path),
@@ -126,27 +126,27 @@
 	    });
 	  };
 
-	  Router.prototype.get = function(path, callback) {
+	  Proxy.prototype.get = function(path, callback) {
 	    return Promise.resolve(this.route('GET', path, callback));
 	  };
 
-	  Router.prototype.post = function(path, callback) {
+	  Proxy.prototype.post = function(path, callback) {
 	    return Promise.resolve(this.route('POST', path, callback));
 	  };
 
-	  Router.prototype.put = function(path, callback) {
+	  Proxy.prototype.put = function(path, callback) {
 	    return Promise.resolve(this.route('PUT', path, callback));
 	  };
 
-	  Router.prototype.patch = function(path, callback) {
+	  Proxy.prototype.patch = function(path, callback) {
 	    return Promise.resolve(this.route('PATCH', path, callback));
 	  };
 
-	  Router.prototype["delete"] = function(path, callback) {
+	  Proxy.prototype["delete"] = function(path, callback) {
 	    return Promise.resolve(this.route('DELETE', path, callback));
 	  };
 
-	  Router.prototype.createResponse = function(request) {
+	  Proxy.prototype.createResponse = function(request) {
 	    var match, params, parsed, path, result, route;
 	    path = request.url.replace(this.root, '').replace(url.parse(request.url).search, '');
 	    result = this.search(request.method.toUpperCase(), path);
@@ -187,7 +187,7 @@
 	    }
 	  };
 
-	  return Router;
+	  return Proxy;
 
 	})();
 
@@ -197,7 +197,7 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArray = __webpack_require__(7);
+	var isArray = __webpack_require__(6);
 
 	/**
 	 * Expose `pathToRegexp`.
@@ -498,7 +498,7 @@
 	      'gopher:': true,
 	      'file:': true
 	    },
-	    querystring = __webpack_require__(6);
+	    querystring = __webpack_require__(7);
 
 	function urlParse(url, parseQueryString, slashesDenoteHost) {
 	  if (url && isObject(url) && url instanceof Url) return url;
@@ -1653,19 +1653,19 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	exports.decode = exports.parse = __webpack_require__(8);
-	exports.encode = exports.stringify = __webpack_require__(9);
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
 
 
 /***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = Array.isArray || function (arr) {
-	  return Object.prototype.toString.call(arr) == '[object Array]';
-	};
+	'use strict';
+
+	exports.decode = exports.parse = __webpack_require__(8);
+	exports.encode = exports.stringify = __webpack_require__(9);
 
 
 /***/ },

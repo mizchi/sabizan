@@ -1,7 +1,8 @@
 PathToRegexp = require 'path-to-regexp'
 url = require 'url'
 
-class Router
+module.exports =
+class Proxy
   constructor: (@root) ->
     @routes = [] # {path: Regexp, callback: Function}[]
 
