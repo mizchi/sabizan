@@ -17,7 +17,7 @@ npm install sabizan --save
 Sabizan only works in ServiceWorker.
 
 ```coffee
-Sabizan = require 'sabizan' # with browserify or importScript
+Sabizan = require 'sabizan' # with browserify or importScript('dist/sabizan.js')
 router = new Sabizan location.origin+'/api'
 
 # it will respond to https://localhost:3000/api/user/fuga?foo=bar
