@@ -49,3 +49,7 @@ $ browserify -t coffeeify --extension=".coffee" src/index.coffee -o dist/sabizan
 
 - Test
 - Documentation
+
+## LICENSE
+
+MIT
