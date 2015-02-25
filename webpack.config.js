@@ -1,8 +1,11 @@
 var webpack = require("webpack");
 module.exports = {
-  entry: './src/index.coffee',
+  entry: {
+    index: './example/index.coffee',
+    sw: './example/sw.coffee'
+  },
   output: {
-    filename: 'public/bundle.js'
+    filename: 'example/[name].js'
   },
 
   module: {
@@ -15,4 +18,3 @@ module.exports = {
     extensions: ["", ".coffee", ".js"]
   }
 }
-

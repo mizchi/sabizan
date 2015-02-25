@@ -2,18 +2,20 @@
   "name": "webpack-skeleton",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/sabizan.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "mizchi",
   "license": "MIT",
   "dependencies": {
-    "coffee-script": "^1.7.1",
+    "path-to-regexp": "^1.0.3"
+  },
+  "devDependencies": {
     "coffee-loader": "^0.7.2",
-    "css-loader": "^0.9.0",
-    "less-loader": "^0.7.7",
-    "style-loader": "^0.8.2",
-    "webpack": "^1.4.13"
+    "coffee-script": "1.9.x",
+    "coffeeify": "^1.0.0",
+    "webpack": "^1.4.13",
+    "whatwg-fetch": "^0.7.0"
   }
 }
