@@ -1,6 +1,6 @@
 {
-  "name": "webpack-skeleton",
-  "version": "0.0.0",
+  "name": "sabizan",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/sabizan.js",
   "scripts": {
