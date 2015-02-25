@@ -3,18 +3,21 @@
 Sabizan is network proxy by ServiceWorker.
 Tested on Chrome Canary 43.
 
+```
+npm install sabizan --save
+```
+
 ## Goal
 
 1. Behave as isomorphic middle layer
 2. Mock network request for test
-
 
 ## How to use
 
 Sabizan only works in ServiceWorker.
 
 ```coffee
-Sabizan = require 'sabizan' # or importScript
+Sabizan = require 'sabizan' # with browserify or importScript
 router = new Sabizan location.origin+'/api'
 
 # it will respond to https://localhost:3000/api/user/fuga?foo=bar
