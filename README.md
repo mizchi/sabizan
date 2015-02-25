@@ -18,22 +18,22 @@ Sabizan only works in ServiceWorker.
 
 ```coffee
 Sabizan = require 'sabizan' # with browserify or importScript('dist/sabizan.js')
-router = new Sabizan location.origin+'/api'
+proxy = new Sabizan location.origin+'/api'
 
 # it will respond to https://localhost:3000/api/user/fuga?foo=bar
-router.get '/user/:id', ({id}, {foo}, req) ->
+proxy.get '/user/:id', ({id}, {foo}, req) ->
   {id, foo}
 
 # Return with promise
-router.post '/post', ({}, body) ->
+proxy.post '/post', ({}, body) ->
   new Promise (done) ->
     setTimeout ->
       done {type: 'this is post:'+params.prop}
     , 300
 
 self.onfetch = (event) ->
-  if router.isHandleScope event.request.url
-    event.respondWith(router.createResponse(event.request))
+  if proxy.isHandleScope event.request.url
+    event.respondWith(proxy.createResponse(event.request))
 ```
 
 See example detail
