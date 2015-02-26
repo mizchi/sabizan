@@ -2,7 +2,7 @@
   "name": "sabizan",
   "version": "0.0.2",
   "description": "Network proxy by ServiceWorker",
-  "main": "dist/sabizan.js",
+  "main": "lib/sabizan.js",
   "scripts": {
     "build": "browserify -t coffeeify --extension=\".coffee\" src/index.coffee -o dist/sabizan.js",
     "test": "echo \"Error: no test specified\" && exit 1"
