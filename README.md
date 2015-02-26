@@ -42,7 +42,7 @@ See example detail
 
 ```
 $ npm install
-$ browserify -t coffeeify --extension=".coffee" src/index.coffee -o dist/sabizan.js
+$ npm run build
 ```
 
 ## TODO
