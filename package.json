@@ -1,10 +1,15 @@
 {
   "name": "sabizan",
   "version": "0.0.2",
-  "description": "",
+  "description": "Network proxy by ServiceWorker",
   "main": "dist/sabizan.js",
   "scripts": {
+    "build": "browserify -t coffeeify --extension=\".coffee\" src/index.coffee -o dist/sabizan.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mizchi/sabizan.git"
   },
   "author": "mizchi",
   "license": "MIT",
@@ -12,6 +17,7 @@
     "path-to-regexp": "^1.0.3"
   },
   "devDependencies": {
+    "browserify": "^9.0.3",
     "coffee-loader": "^0.7.2",
     "coffee-script": "1.9.x",
     "coffeeify": "^1.0.0",
