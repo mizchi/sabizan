@@ -8,18 +8,24 @@ window.addEventListener 'load', =>
     console.error('fail to register', whut)
 
 window.sendGetId = ->
-  fetch 'api/user/mizchi?foo=faaaa',
+  fetch 'api/users/mizchi?foo=faaaa',
     method: 'GET'
   .then (res) => res.json()
   .then (json) => console.log json
 
 window.sendPost = ->
+  body = JSON.stringify({prop: 'is body prop'})
+  # fetch 'api/users/mizchi',
   fetch 'api/post',
-    method: 'POST'
+    method: 'posted'
     bodyUsed: true
     headers:
       'Accept': 'application/json',
       'Content-Type': 'application/json'
-    body: JSON.stringify({prop: 'is body prop'})
-  .then (res) => res.json()
-  .then (json) => console.log json
+    body: body
+  .then (res) =>
+    debugger
+    res.json()
+  .then (json) =>
+    debugger
+    console.log json

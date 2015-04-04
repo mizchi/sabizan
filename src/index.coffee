@@ -1,6 +1,19 @@
 PathToRegexp = require 'path-to-regexp'
 url = require 'url'
 
+class Request
+  # query: Object
+  # body: Object
+  # params: Object
+  # inNode: boolean
+  # inServiceWorker: boolean
+  # _request: Request
+  constructor: (
+    {@query, @body, @params, @_request}
+  ) ->
+    @inBrowser = ServiceWorkerGlobalScope?
+    @inNode = !@isServiceWorker
+
 module.exports =
 class Proxy
   constructor: (@root) ->
@@ -36,9 +49,8 @@ class Proxy
   # Request -> Response
   createResponse: (request) ->
     path = request.url
-      .replace(@root, '')
+      .replace(@root, '') # strip
       .replace(url.parse(request.url).search, '')
-
     result = @search(request.method.toUpperCase(), path)
 
     if result instanceof Error
@@ -48,17 +60,28 @@ class Proxy
           'Content-Type': 'application/json'
     else
       [route, match] = result
+      debugger
+      query = url.parse(request.url, true).query
+      req = new Request {
+        query: query
+        params: match
+        _request: request
+        body: {}
+      }
+
       if request.method is 'GET'
-        parsed = url.parse(request.url, true)
-        params = parsed.query
-        Promise.resolve route.callback(match, params, request)
+        Promise.resolve route.callback(req)
         .then (data) -> new Response JSON.stringify(data),
           status: 200
           headers:
             'Content-Type': 'application/json'
       else
+        debugger
         request.json()
-        .then (body) -> route.callback(match, body, request)
+        .then (body) ->
+          req.body = body
+          debugger
+          route.callback(request)
         .then (data) -> new Response JSON.stringify(data),
           status: 200
           headers:
