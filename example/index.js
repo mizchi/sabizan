@@ -32,8 +32,8 @@ window.sendPost = function() {
   body = JSON.stringify({
     prop: 'is body prop'
   });
-  return fetch('api/post', {
-    method: 'posted',
+  return fetch('api/users/mizchi?aaa=aaa', {
+    method: 'POST',
     bodyUsed: true,
     headers: {
       'Accept': 'application/json',
@@ -42,12 +42,10 @@ window.sendPost = function() {
     body: body
   }).then((function(_this) {
     return function(res) {
-      debugger;
       return res.json();
     };
   })(this)).then((function(_this) {
     return function(json) {
-      debugger;
       return console.log(json);
     };
   })(this));

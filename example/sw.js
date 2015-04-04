@@ -1398,46 +1398,49 @@ function isNullOrUndefined(arg) {
 }
 
 },{"punycode":1,"querystring":4}],6:[function(require,module,exports){
+module.exports = function(proxy) {
+  proxy.get('/users/:id', function(req) {
+    var foo, id;
+    id = req.params.id;
+    foo = req.query.foo;
+    return {
+      id: id,
+      foo: foo
+    };
+  });
+  return proxy.post('/users/:id', function(req) {
+    return {
+      type: 'this is post:' + req.body.prop
+    };
+  });
+};
+
+
+
+},{}],7:[function(require,module,exports){
 var Sabizan, proxy;
 
-Sabizan = require('../src/index');
-
 console.log('serviceworker started!');
+
+Sabizan = require('../src/index');
 
 self.addEventListener('activate', function(e) {
   return e.waitUntil(self.clients.claim());
 });
 
-proxy = new Sabizan(location.origin + '/api');
-
-proxy.get('/users/:id', function(req) {
-  var foo, id;
-  id = req.params.id;
-  foo = req.query.foo;
-  return {
-    id: id,
-    foo: foo
-  };
-});
-
-proxy.post('/post', function(req) {
-  debugger;
-  return {
-    type: 'this is post:' + req.params.prop
-  };
-});
-
 self.onfetch = function(event) {
-  event.request.json();
   if (proxy.isHandleScope(event.request.url)) {
-    debugger;
-    return event.respondWith(proxy.createResponse(event.request));
+    return proxy.wrapFetchEvent(event);
   }
 };
 
+proxy = new Sabizan(location.origin + '/api');
+
+require('./api')(proxy);
 
 
-},{"../src/index":9}],7:[function(require,module,exports){
+
+},{"../src/index":10,"./api":6}],8:[function(require,module,exports){
 var isArray = require('isarray');
 
 /**
@@ -1641,12 +1644,12 @@ function pathToRegexp (path, keys, options) {
   return attachKeys(new RegExp('^' + route, flags(options)), keys);
 }
 
-},{"isarray":8}],8:[function(require,module,exports){
+},{"isarray":9}],9:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var PathToRegexp, Proxy, Request, url;
 
 PathToRegexp = require('path-to-regexp');
@@ -1657,7 +1660,7 @@ Request = (function() {
   function Request(arg) {
     this.query = arg.query, this.body = arg.body, this.params = arg.params, this._request = arg._request;
     this.inBrowser = typeof ServiceWorkerGlobalScope !== "undefined" && ServiceWorkerGlobalScope !== null;
-    this.inNode = !this.isServiceWorker;
+    this.inNode = !this.inBrowser;
   }
 
   return Request;
@@ -1672,6 +1675,10 @@ module.exports = Proxy = (function() {
 
   Proxy.prototype.isHandleScope = function(path) {
     return path.indexOf(this.root) > -1;
+  };
+
+  Proxy.prototype.wrapFetchEvent = function(event) {
+    return event.respondWith(this.createResponse(event.request));
   };
 
   Proxy.prototype.search = function(method, path) {
@@ -1727,9 +1734,10 @@ module.exports = Proxy = (function() {
   };
 
   Proxy.prototype.createResponse = function(request) {
-    var match, path, query, req, result, route;
+    var params, path, query, r, result, route;
     path = request.url.replace(this.root, '').replace(url.parse(request.url).search, '');
     result = this.search(request.method.toUpperCase(), path);
+    route = result[0], params = result[1];
     if (result instanceof Error) {
       return new Response(JSON.stringify({
         error: result.message
@@ -1740,17 +1748,15 @@ module.exports = Proxy = (function() {
         }
       });
     } else {
-      route = result[0], match = result[1];
-      debugger;
       query = url.parse(request.url, true).query;
-      req = new Request({
+      r = new Request({
         query: query,
-        params: match,
+        params: params,
         _request: request,
         body: {}
       });
       if (request.method === 'GET') {
-        return Promise.resolve(route.callback(req)).then(function(data) {
+        return Promise.resolve(route.callback(r)).then(function(data) {
           return new Response(JSON.stringify(data), {
             status: 200,
             headers: {
@@ -1759,11 +1765,9 @@ module.exports = Proxy = (function() {
           });
         });
       } else {
-        debugger;
         return request.json().then(function(body) {
-          req.body = body;
-          debugger;
-          return route.callback(request);
+          r.body = body;
+          return route.callback(r);
         }).then(function(data) {
           return new Response(JSON.stringify(data), {
             status: 200,
@@ -1782,4 +1786,4 @@ module.exports = Proxy = (function() {
 
 
 
-},{"path-to-regexp":7,"url":5}]},{},[6]);
+},{"path-to-regexp":8,"url":5}]},{},[7]);

@@ -1,27 +1,15 @@
-Sabizan = require '../src/index'
-
 console.log('serviceworker started!')
+Sabizan = require '../src/index'
 
 self.addEventListener 'activate', (e) ->
   e.waitUntil(self.clients.claim())
 
-# How to use
-proxy = new Sabizan location.origin+'/api'
-proxy.get '/users/:id', (req) ->
-  {id} = req.params
-  {foo} = req.query
-  {id, foo}
-
-proxy.post '/post', (req) ->
-  # {type: 'posted'}
-  debugger
-  {type: 'this is post:'+req.params.prop}
-
 self.onfetch = (event) ->
-  event.request.json() # => body
   if proxy.isHandleScope event.request.url
-    debugger
-    event.respondWith(proxy.createResponse(event.request))
+    proxy.wrapFetchEvent(event)
+
+proxy = new Sabizan location.origin+'/api'
+require('./api')(proxy)
 
 # push from worker
 # cnt = 0

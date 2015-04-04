@@ -15,17 +15,14 @@ window.sendGetId = ->
 
 window.sendPost = ->
   body = JSON.stringify({prop: 'is body prop'})
-  # fetch 'api/users/mizchi',
-  fetch 'api/post',
-    method: 'posted'
+  fetch 'api/users/mizchi?aaa=aaa',
+    method: 'POST'
     bodyUsed: true
     headers:
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     body: body
   .then (res) =>
-    debugger
     res.json()
   .then (json) =>
-    debugger
     console.log json
