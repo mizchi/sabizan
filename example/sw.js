@@ -1398,8 +1398,8 @@ function isNullOrUndefined(arg) {
 }
 
 },{"punycode":1,"querystring":4}],6:[function(require,module,exports){
-module.exports = function(proxy) {
-  proxy.get('/users/:id', function(req) {
+module.exports = function(router) {
+  router.get('/users/:id', function(req) {
     var foo, id;
     id = req.params.id;
     foo = req.query.foo;
@@ -1408,7 +1408,7 @@ module.exports = function(proxy) {
       foo: foo
     };
   });
-  return proxy.post('/users/:id', function(req) {
+  return router.post('/users/:id', function(req) {
     return {
       type: 'this is post:' + req.body.prop
     };
@@ -1436,11 +1436,11 @@ self.onfetch = function(event) {
 
 proxy = new Sabizan(location.origin + '/api');
 
-require('./api')(proxy);
+require('./routes')(proxy);
 
 
 
-},{"../src/index":10,"./api":6}],8:[function(require,module,exports){
+},{"../src/index":10,"./routes":6}],8:[function(require,module,exports){
 var isArray = require('isarray');
 
 /**
@@ -1650,38 +1650,27 @@ module.exports = Array.isArray || function (arr) {
 };
 
 },{}],10:[function(require,module,exports){
-var PathToRegexp, Proxy, Request, url;
+var PathToRegexp, Request, Sabizan, url;
 
 PathToRegexp = require('path-to-regexp');
 
 url = require('url');
 
-Request = (function() {
-  function Request(arg) {
-    this.query = arg.query, this.body = arg.body, this.params = arg.params, this._request = arg._request;
-    this.inBrowser = typeof ServiceWorkerGlobalScope !== "undefined" && ServiceWorkerGlobalScope !== null;
-    this.inNode = !this.inBrowser;
-  }
-
-  return Request;
-
-})();
-
-module.exports = Proxy = (function() {
-  function Proxy(root) {
+module.exports = Sabizan = (function() {
+  function Sabizan(root) {
     this.root = root;
     this.routes = [];
   }
 
-  Proxy.prototype.isHandleScope = function(path) {
+  Sabizan.prototype.isHandleScope = function(path) {
     return path.indexOf(this.root) > -1;
   };
 
-  Proxy.prototype.wrapFetchEvent = function(event) {
+  Sabizan.prototype.wrapFetchEvent = function(event) {
     return event.respondWith(this.createResponse(event.request));
   };
 
-  Proxy.prototype.search = function(method, path) {
+  Sabizan.prototype.search = function(method, path) {
     var i, j, key, len, len1, m, match, n, r, ref, ref1;
     ref = this.routes;
     for (i = 0, len = ref.length; i < len; i++) {
@@ -1705,7 +1694,7 @@ module.exports = Proxy = (function() {
     return new Error(path + ' is not routed to anywhere');
   };
 
-  Proxy.prototype.route = function(method, path, callback) {
+  Sabizan.prototype.route = function(method, path, callback) {
     return this.routes.push({
       method: method,
       regexp: PathToRegexp(path),
@@ -1713,27 +1702,27 @@ module.exports = Proxy = (function() {
     });
   };
 
-  Proxy.prototype.get = function(path, callback) {
+  Sabizan.prototype.get = function(path, callback) {
     return Promise.resolve(this.route('GET', path, callback));
   };
 
-  Proxy.prototype.post = function(path, callback) {
+  Sabizan.prototype.post = function(path, callback) {
     return Promise.resolve(this.route('POST', path, callback));
   };
 
-  Proxy.prototype.put = function(path, callback) {
+  Sabizan.prototype.put = function(path, callback) {
     return Promise.resolve(this.route('PUT', path, callback));
   };
 
-  Proxy.prototype.patch = function(path, callback) {
+  Sabizan.prototype.patch = function(path, callback) {
     return Promise.resolve(this.route('PATCH', path, callback));
   };
 
-  Proxy.prototype["delete"] = function(path, callback) {
+  Sabizan.prototype["delete"] = function(path, callback) {
     return Promise.resolve(this.route('DELETE', path, callback));
   };
 
-  Proxy.prototype.createResponse = function(request) {
+  Sabizan.prototype.createResponse = function(request) {
     var params, path, query, r, result, route;
     path = request.url.replace(this.root, '').replace(url.parse(request.url).search, '');
     result = this.search(request.method.toUpperCase(), path);
@@ -1780,7 +1769,57 @@ module.exports = Proxy = (function() {
     }
   };
 
-  return Proxy;
+  return Sabizan;
+
+})();
+
+Sabizan.Server = (function() {
+  var wrap;
+
+  function Server(_app) {
+    this._app = _app;
+  }
+
+  wrap = function(app, method, path, callback) {
+    return app[method](path, function(req, res) {
+      return Promise.resolve(callback(req)).then(function(data) {
+        return res.json(data);
+      });
+    });
+  };
+
+  Server.prototype.get = function(path, callback) {
+    return wrap(this._app, 'get', path, callback);
+  };
+
+  Server.prototype.put = function(path, callback) {
+    return wrap(this._app, 'put', path, callback);
+  };
+
+  Server.prototype.post = function(path, callback) {
+    return wrap(this._app, 'post', path, callback);
+  };
+
+  Server.prototype.patch = function(path, callback) {
+    return wrap(this._app, 'patch', path, callback);
+  };
+
+  Server.prototype["delete"] = function(path, callback) {
+    return wrap(this._app, 'delete', path, callback);
+  };
+
+  return Server;
+
+})();
+
+Request = Sabizan.Request = (function() {
+  function Request(arg) {
+    this.query = arg.query, this.body = arg.body, this.params = arg.params, this._request = arg._request;
+    this.inBrowser = typeof ServiceWorkerGlobalScope !== "undefined" && ServiceWorkerGlobalScope !== null;
+    this.inNode = !this.inBrowser;
+  }
+
+  return Request;
 
 })();
 

@@ -9,7 +9,7 @@ self.onfetch = (event) ->
     proxy.wrapFetchEvent(event)
 
 proxy = new Sabizan location.origin+'/api'
-require('./api')(proxy)
+require('./routes')(proxy)
 
 # push from worker
 # cnt = 0
