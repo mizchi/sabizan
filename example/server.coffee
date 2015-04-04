@@ -11,5 +11,5 @@ app.listen(3000)
 
 Sabizan = require '../src/index'
 
-proxy = new Sabizan.Server app
+proxy = new Sabizan.Server app, '/api'
 require('./routes')(proxy)

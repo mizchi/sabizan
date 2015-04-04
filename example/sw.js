@@ -1434,7 +1434,7 @@ self.onfetch = function(event) {
   }
 };
 
-proxy = new Sabizan(location.origin + '/api');
+proxy = new Sabizan.ServiceWorker(location.origin + '/api');
 
 require('./routes')(proxy);
 
@@ -1656,21 +1656,23 @@ PathToRegexp = require('path-to-regexp');
 
 url = require('url');
 
-module.exports = Sabizan = (function() {
-  function Sabizan(root) {
+module.exports = Sabizan = {};
+
+Sabizan.ServiceWorker = (function() {
+  function ServiceWorker(root) {
     this.root = root;
     this.routes = [];
   }
 
-  Sabizan.prototype.isHandleScope = function(path) {
+  ServiceWorker.prototype.isHandleScope = function(path) {
     return path.indexOf(this.root) > -1;
   };
 
-  Sabizan.prototype.wrapFetchEvent = function(event) {
+  ServiceWorker.prototype.wrapFetchEvent = function(event) {
     return event.respondWith(this.createResponse(event.request));
   };
 
-  Sabizan.prototype.search = function(method, path) {
+  ServiceWorker.prototype.search = function(method, path) {
     var i, j, key, len, len1, m, match, n, r, ref, ref1;
     ref = this.routes;
     for (i = 0, len = ref.length; i < len; i++) {
@@ -1694,7 +1696,7 @@ module.exports = Sabizan = (function() {
     return new Error(path + ' is not routed to anywhere');
   };
 
-  Sabizan.prototype.route = function(method, path, callback) {
+  ServiceWorker.prototype.route = function(method, path, callback) {
     return this.routes.push({
       method: method,
       regexp: PathToRegexp(path),
@@ -1702,27 +1704,27 @@ module.exports = Sabizan = (function() {
     });
   };
 
-  Sabizan.prototype.get = function(path, callback) {
+  ServiceWorker.prototype.get = function(path, callback) {
     return Promise.resolve(this.route('GET', path, callback));
   };
 
-  Sabizan.prototype.post = function(path, callback) {
+  ServiceWorker.prototype.post = function(path, callback) {
     return Promise.resolve(this.route('POST', path, callback));
   };
 
-  Sabizan.prototype.put = function(path, callback) {
+  ServiceWorker.prototype.put = function(path, callback) {
     return Promise.resolve(this.route('PUT', path, callback));
   };
 
-  Sabizan.prototype.patch = function(path, callback) {
+  ServiceWorker.prototype.patch = function(path, callback) {
     return Promise.resolve(this.route('PATCH', path, callback));
   };
 
-  Sabizan.prototype["delete"] = function(path, callback) {
+  ServiceWorker.prototype["delete"] = function(path, callback) {
     return Promise.resolve(this.route('DELETE', path, callback));
   };
 
-  Sabizan.prototype.createResponse = function(request) {
+  ServiceWorker.prototype.createResponse = function(request) {
     var params, path, query, r, result, route;
     path = request.url.replace(this.root, '').replace(url.parse(request.url).search, '');
     result = this.search(request.method.toUpperCase(), path);
@@ -1769,15 +1771,16 @@ module.exports = Sabizan = (function() {
     }
   };
 
-  return Sabizan;
+  return ServiceWorker;
 
 })();
 
 Sabizan.Server = (function() {
   var wrap;
 
-  function Server(_app) {
+  function Server(_app, scope) {
     this._app = _app;
+    this.scope = scope;
   }
 
   wrap = function(app, method, path, callback) {
@@ -1789,23 +1792,23 @@ Sabizan.Server = (function() {
   };
 
   Server.prototype.get = function(path, callback) {
-    return wrap(this._app, 'get', path, callback);
+    return wrap(this._app, 'get', this.scope + path, callback);
   };
 
   Server.prototype.put = function(path, callback) {
-    return wrap(this._app, 'put', path, callback);
+    return wrap(this._app, 'put', this.scope + path, callback);
   };
 
   Server.prototype.post = function(path, callback) {
-    return wrap(this._app, 'post', path, callback);
+    return wrap(this._app, 'post', this.scope + path, callback);
   };
 
   Server.prototype.patch = function(path, callback) {
-    return wrap(this._app, 'patch', path, callback);
+    return wrap(this._app, 'patch', this.scope + path, callback);
   };
 
   Server.prototype["delete"] = function(path, callback) {
-    return wrap(this._app, 'delete', path, callback);
+    return wrap(this._app, 'delete', this.scope + path, callback);
   };
 
   return Server;

@@ -8,7 +8,7 @@ self.onfetch = (event) ->
   if proxy.isHandleScope event.request.url
     proxy.wrapFetchEvent(event)
 
-proxy = new Sabizan location.origin+'/api'
+proxy = new Sabizan.ServiceWorker location.origin+'/api'
 require('./routes')(proxy)
 
 # push from worker

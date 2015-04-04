@@ -1,8 +1,9 @@
 PathToRegexp = require 'path-to-regexp'
 url = require 'url'
 
-module.exports =
-class Sabizan
+module.exports = Sabizan = {}
+
+class Sabizan.ServiceWorker
   constructor: (@root) ->
     @routes = [] # {path: Regexp, callback: Function}[]
 
@@ -76,17 +77,18 @@ class Sabizan
               'Content-Type': 'application/json'
 
 class Sabizan.Server
-  constructor: (@_app) ->
+  constructor: (@_app, @scope) ->
   wrap = (app, method, path, callback) ->
     app[method] path, (req, res) ->
       Promise.resolve(callback(req))
       .then (data) ->
         res.json data
-  get: (path, callback) -> wrap @_app, 'get', path, callback
-  put: (path, callback) -> wrap @_app, 'put', path, callback
-  post: (path, callback) -> wrap @_app, 'post', path, callback
-  patch: (path, callback) -> wrap @_app, 'patch', path, callback
-  delete: (path, callback) -> wrap @_app, 'delete', path, callback
+
+  get: (path, callback) -> wrap @_app, 'get', @scope + path, callback
+  put: (path, callback) -> wrap @_app, 'put', @scope + path, callback
+  post: (path, callback) -> wrap @_app, 'post', @scope + path, callback
+  patch: (path, callback) -> wrap @_app, 'patch', @scope + path, callback
+  delete: (path, callback) -> wrap @_app, 'delete', @scope + path, callback
 
 Request = class Sabizan.Request
   # query: Object

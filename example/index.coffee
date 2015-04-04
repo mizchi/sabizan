@@ -1,6 +1,13 @@
 require 'whatwg-fetch'
 
-window.addEventListener 'load', =>
+# window.addEventListener 'load', =>
+#   navigator.serviceWorker.register 'sw.js', scope: '.'
+#   .then (r) ->
+#     console.log('service-worker registered')
+#   .catch (whut) ->
+#     console.error('fail to register', whut)
+
+window.start = ->
   navigator.serviceWorker.register 'sw.js', scope: '.'
   .then (r) ->
     console.log('service-worker registered')
@@ -17,7 +24,6 @@ window.sendPost = ->
   body = JSON.stringify({prop: 'is body prop'})
   fetch 'api/users/mizchi?aaa=aaa',
     method: 'POST'
-    bodyUsed: true
     headers:
       'Accept': 'application/json',
       'Content-Type': 'application/json'
