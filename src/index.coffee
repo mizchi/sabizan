@@ -1,13 +1,17 @@
 PathToRegexp = require 'path-to-regexp'
 url = require 'url'
 
-module.exports =
-class Proxy
+module.exports = Sabizan = {}
+
+class Sabizan.ServiceWorker
   constructor: (@root) ->
     @routes = [] # {path: Regexp, callback: Function}[]
 
   isHandleScope: (path) ->
     path.indexOf(@root) > -1
+
+  wrapFetchEvent: (event) ->
+    event.respondWith @createResponse(event.request)
 
   search: (method, path) ->
     for r in @routes when r.method is method
@@ -36,10 +40,10 @@ class Proxy
   # Request -> Response
   createResponse: (request) ->
     path = request.url
-      .replace(@root, '')
+      .replace(@root, '') # strip
       .replace(url.parse(request.url).search, '')
-
     result = @search(request.method.toUpperCase(), path)
+    [route, params] = result
 
     if result instanceof Error
       new Response JSON.stringify({error: result.message}),
@@ -47,19 +51,54 @@ class Proxy
         headers:
           'Content-Type': 'application/json'
     else
-      [route, match] = result
+      query = url.parse(request.url, true).query
+      r = new Request {
+        query: query
+        params: params
+        _request: request
+        body: {}
+      }
+
       if request.method is 'GET'
-        parsed = url.parse(request.url, true)
-        params = parsed.query
-        Promise.resolve route.callback(match, params, request)
+        Promise.resolve route.callback(r)
         .then (data) -> new Response JSON.stringify(data),
           status: 200
           headers:
             'Content-Type': 'application/json'
       else
         request.json()
-        .then (body) -> route.callback(match, body, request)
-        .then (data) -> new Response JSON.stringify(data),
-          status: 200
-          headers:
-            'Content-Type': 'application/json'
+        .then (body) ->
+          r.body = body
+          route.callback(r)
+        .then (data) ->
+          new Response JSON.stringify(data),
+            status: 200
+            headers:
+              'Content-Type': 'application/json'
+
+class Sabizan.Server
+  constructor: (@_app, @scope) ->
+  wrap = (app, method, path, callback) ->
+    app[method] path, (req, res) ->
+      Promise.resolve(callback(req))
+      .then (data) ->
+        res.json data
+
+  get: (path, callback) -> wrap @_app, 'get', @scope + path, callback
+  put: (path, callback) -> wrap @_app, 'put', @scope + path, callback
+  post: (path, callback) -> wrap @_app, 'post', @scope + path, callback
+  patch: (path, callback) -> wrap @_app, 'patch', @scope + path, callback
+  delete: (path, callback) -> wrap @_app, 'delete', @scope + path, callback
+
+Request = class Sabizan.Request
+  # query: Object
+  # body: Object
+  # params: Object
+  # inNode: boolean
+  # inServiceWorker: boolean
+  # _request: Request
+  constructor: (
+    {@query, @body, @params, @_request}
+  ) ->
+    @inBrowser = ServiceWorkerGlobalScope?
+    @inNode = !@inBrowser
